@@ -1,3 +1,6 @@
+import database as db
+import pandas as pd
+import random
 
 class Recommender:
     """
@@ -39,7 +42,17 @@ class Recommender:
         Args:
             genre: A string representing the genre to search from.
         """
-        pass
+        genre_movies = db.movies[db.movies.genres.str.contains(genre)]
+        num_movies = len(genre_movies)
+        movies_to_get = []
+        for i in range(5):
+            movie_number = random.randrange(0, num_movies, 1)
+            movies_to_get.append(movie_number)
+        movie_list = []
+        for i in range(5):
+            movie_title = genre_movies.iloc[movies_to_get[i]]['primaryTitle']
+            movie_list.append(movie_title)
+        self._current_movies = movie_list
 
     def expand_search(self):
         """

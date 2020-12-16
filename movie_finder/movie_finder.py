@@ -8,21 +8,18 @@ class Recommender:
     Representation of a movie recommendation generator.
 
     Attributes:
-        _used_movies: An empty list that will store all movies that have
-        already been recommended. 
         _current_movies: An empty list that will store the movies that will
         be recommended.
         _state: A string representing if the recommender is currently asking
         for a genre or searching for movies. 
-        _limit: An integer representing how many movies should be used in the
-        recommendation search. 
+        _search_db: An dataframe that represents the database of movies that
+        fulfill the user parameters. 
     """
     def __init__(self):
         """
         Create a new Recommender instance. 
         """
         self._current_movies = []
-        self._state = "genres"
         self._search_db = None
 
     def reset(self):
@@ -31,10 +28,20 @@ class Recommender:
         program.
         """
         self._current_movies = []
-        self._state = "genres"
         self._search_db = None
     
     def create_search_database(self, popularity, rating, low_year, high_year, genre):
+        """
+        Create a smaller database of valid movies based on given parameters.
+
+        Args:
+            popularity: An integer representing the popularity of the movie.
+            low_year: An integer representing the oldest year a movie should be
+            from.
+            high_year: An integer representing the most recent year a movie
+            should be from.
+            rating: A float representing the user rating of the movie.
+        """
         search_db = movie_db
         search_db = search_db[search_db['popularity'] >= popularity]
         if rating != None:
@@ -49,10 +56,10 @@ class Recommender:
 
     def find_movies(self):
         """
-        Randomly select 8 movies that are within the given genre.
+        Randomly select up to 5 movies from the database.
 
-        Args:
-            genre: A string representing the genre to search from.
+        Returns:
+            A list of up to 5 movies, their release year and their user rating.
         """
         num_movies = len(self._search_db)
         if num_movies == 0:
@@ -88,30 +95,6 @@ class Recommender:
         self._current_movies = movie_list
         return movie_list
 
-    def search(self):
-        """
-        Signify that the program is searching movies.
-        """
-        self._state = "searching"
-
-    def get_movies(self):
-        """
-        Return the current movies to be recommended.
-        """
-        return self._current_movies
-
-    def get_state(self):
-        """
-        Return the current state of the program.
-        """
-        return self._state
-
-    def ended(self):
-        """
-        End the program.
-        """
-        pass
-
 
 class View:
     """
@@ -119,21 +102,11 @@ class View:
 
     Attributes:
         genres: A list of movie genres.
-        _system: A recommender instance.
     """
     genres = ['Romance', 'Drama', 'Comedy', 'Crime', 'War', 'Sci-Fi',
        'Western', 'Adventure', 'Documentary', 'Biography', 'Action',
        'Horror', 'Fantasy', 'Mystery', 'History', 'Animation', 'Musical',
        'Thriller', 'Family', 'Music', 'Sport', 'Film-Noir']
-
-    def __init__(self, system):
-        """
-        Create View for movie recommender.
-
-        Args:
-            system: A Recommender instance.
-        """
-        self._system = system
 
     def show_genres(self):
         """
@@ -145,6 +118,9 @@ class View:
     def show_movies(self, movies):
         """
         Print the recommended movies.
+
+        Args:
+            movies: A list of movies to print.
         """
         if movies != None:
             for i in range(len(movies)):
@@ -161,6 +137,14 @@ class Controller:
        'Thriller', 'Family', 'Music', 'Sport', 'Film-Noir']
 
     def ask_for_year(self):
+        """
+        Ask the user if the search should be limited by year. If yes, ask for
+        a low year and high year to bracket the search.
+
+        Returns:
+            A list of length 2 containing the low year and high year or None
+            and None if the user does not want to limit the search by year. 
+        """
         low_year = 2020.1
         high_year = 2020.1
         yesno = input("Do you want to search movies by year? (Enter yes or no): ")
@@ -190,7 +174,10 @@ class Controller:
 
     def ask_for_genre(self):
         """
-        Ask the user to enter a genre. Return the genre selected by the user.
+        Ask the user to enter a genre. 
+
+        Returns:
+            A string representing the selected genre.
         """
         while True:
             genre = input("Enter which genre you would like to watch: ")
@@ -200,6 +187,14 @@ class Controller:
             print('Invalid genre.')
 
     def ask_for_rating(self):
+        """
+        Ask the user if they want to limit the search by rating. If yes, ask
+        for a minimum rating.
+
+        Returns:
+            An float representing the minimum user rating that should be
+            included in the search.
+        """
         yesno = input("Do you want to limit your search by rating? (Enter yes or no): ")
         while yesno != 'yes' and yesno != 'no':
             yesno = input('Invalid input, please enter yes or no. ')
@@ -219,8 +214,10 @@ class Controller:
 
     def ask_for_instruction(self):
         """
-        Ask the user what should be done next. Return a number signifying an
-        instruction to be followed.
+        Ask the user if the program should search again or reset.
+
+        Returns:
+            Return a string signifying an instruction to be followed.
         """
         instruction = input(
             "Type search to search again or reset to reset the parameters: ")
@@ -232,6 +229,16 @@ class Controller:
         return instruction
 
     def ask_for_expansion(self):
+        """
+        Ask the user if less popular movies should be included.
+
+        By default the search only includes the 10% most popular movies, this
+        function asks the user if this should be expanded in increments of 10%.
+
+        Returns:
+            An integer representing the worst popularity value that should be
+            included in the search. 
+        """
         expand = 'yes'
         popularity = 10
         print('By default the search only includes the top 10% most popular movies.')
@@ -258,23 +265,23 @@ def main():
     Run the movie recommender.
     """
     system = Recommender()
-    view = View(system)
+    view = View()
     controller = Controller()
 
-    while not system.ended():
+    while True:
         view.show_genres()
         genre = controller.ask_for_genre()
         years = controller.ask_for_year()
         rating = controller.ask_for_rating()
         popularity = controller.ask_for_expansion()
-        system.search()
         system.create_search_database(popularity, rating, years[0], years[1], genre)
-        while system.get_state() == "searching":
+        while True:
             movies = system.find_movies()
             view.show_movies(movies)
             instruction = controller.ask_for_instruction()
             if instruction == 'reset':
                 system.reset()
+                break
 
 
 if __name__ == "__main__":

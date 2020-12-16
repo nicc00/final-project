@@ -3,7 +3,7 @@ The goal of this project is was to create a movie recommendation program. It wor
 ## Features
 Through this program you can search for movies based on genre, release year, IMDb user rating and poularity!
 ## Installation 
-To install the program simply download all the files in the linked github repository.
+To install the program simply download all the files in the ["movie_finder" folder](https://github.com/nicc00/movie-finder/tree/master/movie_finder).
 ## About the creator
 My name is Nic Cort and this project was created for educational purposes only. 
 

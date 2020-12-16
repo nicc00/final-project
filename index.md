@@ -6,4 +6,5 @@ Through this program you can search for movies based on genre, release year, IMD
 To install the program simply download all the files in the linked github repository.
 ## About the creator
 My name is Nic Cort and this project was created for educational purposes only. 
+
 Thank you to IMDb for providing the free movie data.

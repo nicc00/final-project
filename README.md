@@ -1,0 +1,1 @@
+This project is an attempt at making a movie recommender by searching for movies based on given user input. The program is simple and will run in a terminal window. To get started, install the files contained in the "movie_finder" folder. Make sure both files are stored in the same folder on your computer. To run the program simply call the "movie_finder.py" file.

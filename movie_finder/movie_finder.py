@@ -1,7 +1,8 @@
 import pandas as pd
 import random
 
-movie_db = pd.read_csv('movies.tsv', sep='\t',low_memory=False)
+movie_db = pd.read_csv('movie_finder/movies.tsv', sep='\t', low_memory=False)
+
 
 class Recommender:
     """
@@ -11,13 +12,13 @@ class Recommender:
         _current_movies: An empty list that will store the movies that will
         be recommended.
         _state: A string representing if the recommender is currently asking
-        for a genre or searching for movies. 
+        for a genre or searching for movies.
         _search_db: An dataframe that represents the database of movies that
-        fulfill the user parameters. 
+        fulfill the user parameters.
     """
     def __init__(self):
         """
-        Create a new Recommender instance. 
+        Create a new Recommender instance.
         """
         self._current_movies = []
         self._search_db = None
@@ -29,8 +30,9 @@ class Recommender:
         """
         self._current_movies = []
         self._search_db = None
-    
-    def create_search_database(self, popularity, rating, low_year, high_year, genre):
+
+    def create_search_database(self, popularity, rating, low_year, high_year,
+                               genre):
         """
         Create a smaller database of valid movies based on given parameters.
 
@@ -44,15 +46,16 @@ class Recommender:
         """
         search_db = movie_db
         search_db = search_db[search_db['popularity'] >= popularity]
-        if rating != None:
+        if rating is not None:
             search_db = search_db[search_db['averageRating'] >= rating]
-        if low_year != None:
+        if low_year is not None:
             search_db = search_db[search_db['startYear'] >= low_year]
-        if high_year != None:
+        if high_year is not None:
             search_db = search_db[search_db['startYear'] <= high_year]
-        if genre != None:
+        if genre is not None:
             search_db = search_db[search_db.genres.str.contains(genre)]
         self._search_db = search_db
+        return search_db
 
     def find_movies(self):
         """
@@ -72,9 +75,11 @@ class Recommender:
                 movie_title = self._search_db.iloc[0]['primaryTitle']
                 movie_year = self._search_db.iloc[0]['startYear']
                 movie_rating = self._search_db.iloc[0]['averageRating']
-                movie = movie_title + ' (' + str(movie_year) + ')' + ' ' + str(movie_rating)
+                movie = (movie_title + ' (' + str(movie_year) + ')' + ' '
+                         + str(movie_rating))
                 movie_list.append(movie)
-                self._search_db = self._search_db.drop(self._search_db.index[0], 0)
+                self._search_db = self._search_db.drop(
+                    self._search_db.index[0], 0)
             return movie_list
         movies_to_get = []
         for _ in range(5):
@@ -83,11 +88,14 @@ class Recommender:
                 movie_number = random.randrange(0, num_movies, 1)
             movies_to_get.append(movie_number)
         for i in range(5):
-            movie_title = self._search_db.iloc[movies_to_get[i]]['primaryTitle']
+            movie_title = (self._search_db.iloc[movies_to_get[i]]
+                           ['primaryTitle'])
             movie_year = self._search_db.iloc[movies_to_get[i]]['startYear']
-            movie_rating = self._search_db.iloc[movies_to_get[i]]['averageRating']
+            movie_rating = (self._search_db.iloc[movies_to_get[i]]
+                            ['averageRating'])
             movie_id = self._search_db.index[movies_to_get[i]]
-            movie = movie_title + ' (' + str(movie_year) + ')' + ' ' + str(movie_rating)
+            movie = (movie_title + ' (' + str(movie_year) + ')' + ' '
+                     + str(movie_rating))
             movie_list.append(movie)
             movie_ids.append(movie_id)
         for i in range(5):
@@ -104,9 +112,9 @@ class View:
         genres: A list of movie genres.
     """
     genres = ['Romance', 'Drama', 'Comedy', 'Crime', 'War', 'Sci-Fi',
-       'Western', 'Adventure', 'Documentary', 'Biography', 'Action',
-       'Horror', 'Fantasy', 'Mystery', 'History', 'Animation', 'Musical',
-       'Thriller', 'Family', 'Music', 'Sport', 'Film-Noir']
+              'Western', 'Adventure', 'Documentary', 'Biography', 'Action',
+              'Horror', 'Fantasy', 'Mystery', 'History', 'Animation',
+              'Musical', 'Thriller', 'Family', 'Music', 'Sport', 'Film-Noir']
 
     def show_genres(self):
         """
@@ -122,7 +130,7 @@ class View:
         Args:
             movies: A list of movies to print.
         """
-        if movies != None:
+        if movies is not None:
             for i in range(len(movies)):
                 print(movies[i])
 
@@ -132,9 +140,9 @@ class Controller:
     Controller for movie recommender.
     """
     genres = ['Romance', 'Drama', 'Comedy', 'Crime', 'War', 'Sci-Fi',
-       'Western', 'Adventure', 'Documentary', 'Biography', 'Action',
-       'Horror', 'Fantasy', 'Mystery', 'History', 'Animation', 'Musical',
-       'Thriller', 'Family', 'Music', 'Sport', 'Film-Noir']
+              'Western', 'Adventure', 'Documentary', 'Biography', 'Action',
+              'Horror', 'Fantasy', 'Mystery', 'History', 'Animation',
+              'Musical', 'Thriller', 'Family', 'Music', 'Sport', 'Film-Noir']
 
     def ask_for_year(self):
         """
@@ -143,11 +151,12 @@ class Controller:
 
         Returns:
             A list of length 2 containing the low year and high year or None
-            and None if the user does not want to limit the search by year. 
+            and None if the user does not want to limit the search by year.
         """
         low_year = 2020.1
         high_year = 2020.1
-        yesno = input("Do you want to search movies by year? (Enter yes or no): ")
+        yesno = input(
+            "Do you want to search movies by year? (Enter yes or no): ")
         while yesno != 'yes' and yesno != 'no':
             yesno = input('Invalid input, please enter yes or no. ')
         if yesno == 'no':
@@ -157,7 +166,9 @@ class Controller:
                 print("Please enter a valid year.")
             while True:
                 try:
-                    low_year = int(input('How far back do you want to search for movies? (Enter a year like 1984): '))
+                    low_year = int(input(
+                        'How far back do you want to search for movies? '
+                        '(Enter a year like 1984): '))
                     break
                 except:
                     print("Please enter a valid year.")
@@ -166,7 +177,8 @@ class Controller:
                 print("Please enter a valid year.")
             while True:
                 try:
-                    high_year = int(input('How recent do you want to search for movies? (Enter a year like 2020): '))
+                    high_year = int(input('How recent do you want to search'
+                                    ' for movies? (Enter a year like 2020): '))
                     break
                 except:
                     print("Please enter a valid year.")
@@ -174,7 +186,7 @@ class Controller:
 
     def ask_for_genre(self):
         """
-        Ask the user to enter a genre. 
+        Ask the user to enter a genre.
 
         Returns:
             A string representing the selected genre.
@@ -195,7 +207,8 @@ class Controller:
             An float representing the minimum user rating that should be
             included in the search.
         """
-        yesno = input("Do you want to limit your search by rating? (Enter yes or no): ")
+        yesno = input("Do you want to limit your search by rating?"
+                      " (Enter yes or no): ")
         while yesno != 'yes' and yesno != 'no':
             yesno = input('Invalid input, please enter yes or no. ')
         if yesno == 'no':
@@ -206,7 +219,8 @@ class Controller:
                 print("Please enter a valid rating.")
             while True:
                 try:
-                    rating = float(input('Enter a minimum rating from 0-10. (ex. 7.5): '))
+                    rating = float(input('Enter a minimum rating from 0-10.'
+                                   ' (ex. 7.5): '))
                     break
                 except:
                     print("Please enter a valid rating.")
@@ -225,7 +239,8 @@ class Controller:
             while instruction != 'search' and instruction != 'reset':
                 print("Invalid input")
                 instruction = input(
-                    "Type search to search again or reset to reset the parameters: ")
+                    "Type search to search again or reset to reset the"
+                    " parameters: ")
         return instruction
 
     def ask_for_expansion(self):
@@ -237,20 +252,23 @@ class Controller:
 
         Returns:
             An integer representing the worst popularity value that should be
-            included in the search. 
+            included in the search.
         """
         expand = 'yes'
         popularity = 10
-        print('By default the search only includes the top 10% most popular movies.')
-        yesno = input("Would you like to expand the search to include more movies? (Enter yes or no): ")
+        print('By default the search only includes the top 10% most popular'
+              ' movies.')
+        yesno = input("Would you like to expand the search to include more"
+                      " movies? (Enter yes or no): ")
         while yesno != 'yes' and yesno != 'no':
             yesno = input('Invalid input, please enter yes or no. ')
         if yesno == 'no':
             return popularity
-        popularity -=1
+        popularity -= 1
         while expand == 'yes':
             percentage = 110 - popularity * 10
-            print('The search will now include the top ', percentage, '% most popular movies.', sep='')
+            print('The search will now include the top ', percentage,
+                  '% most popular movies.', sep='')
             expand = input("Would you like to expand the search further?: ")
             while expand != 'yes' and expand != 'no':
                 expand = input('Invalid input, please enter yes or no. ')
@@ -259,6 +277,7 @@ class Controller:
                 print('The search will now include all movies.')
                 expand = 'no'
         return popularity
+
 
 def main():
     """
@@ -274,7 +293,8 @@ def main():
         years = controller.ask_for_year()
         rating = controller.ask_for_rating()
         popularity = controller.ask_for_expansion()
-        system.create_search_database(popularity, rating, years[0], years[1], genre)
+        system.create_search_database(popularity, rating, years[0], years[1],
+                                      genre)
         while True:
             movies = system.find_movies()
             view.show_movies(movies)
